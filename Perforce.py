@@ -39,7 +39,11 @@ def ConstructCommand(in_command):
     if ( p4Path == None or p4Path == '' ):
         p4Path = ''
     command = ''
-    if(p4Env and p4Env != ''):
+    if(sublime.platform() == "windows"):
+        if(p4Env and p4Env != ''):
+            #p4Env is a bat file which to set P4USER etc.
+            command = '{0} && {1}'.format(p4Env, p4Path)
+    elif(p4Env and p4Env != ''):
         command = '. {0} && {1}'.format(p4Env, p4Path)
     elif(sublime.platform() == "osx"):
         command = '. ~/.bash_profile && {0}'.format(p4Path)
@@ -272,8 +276,8 @@ def IsFileWritable(in_filename):
 
 # Checkout section
 def Checkout(in_filename):
-    if(IsFileWritable(in_filename)):
-        return -1, "File is already writable."
+    # if(IsFileWritable(in_filename)):
+    #     return -1, "File is already writable."
 
     folder_name, filename = os.path.split(in_filename)
     isInDepot = IsFileInDepot(folder_name, filename)
@@ -309,9 +313,9 @@ class PerforceAutoCheckout(sublime_plugin.EventListener):
         if(not perforce_settings.get('perforce_auto_checkout') or not perforce_settings.get('perforce_auto_checkout_on_save')):
             return
               
-        if(view.is_dirty()):
-            success, message = Checkout(view.file_name())
-            LogResults(success, message);
+        #if(view.is_dirty()):
+        success, message = Checkout(view.file_name())
+        LogResults(success, message);
 
 class PerforceCheckoutCommand(sublime_plugin.TextCommand):
     def run(self, edit):
